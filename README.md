@@ -30,7 +30,7 @@ To run this project locally:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/firebase_flutter.git
+   git clone https://github.com/Rethabile2004/firebase_flutter.git
    cd firebase_flutter
    ```
 2. Install dependencies
