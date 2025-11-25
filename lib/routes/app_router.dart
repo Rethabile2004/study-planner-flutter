@@ -5,8 +5,10 @@
 //
 
 import 'package:firebase_flutter/auth/auth_page.dart';
+import 'package:firebase_flutter/auth/complete_profile.dart';
 import 'package:firebase_flutter/views/edit_profile_screen.dart';
 import 'package:firebase_flutter/views/home_page.dart';
+import 'package:firebase_flutter/views/main_layout.dart';
 import 'package:flutter/material.dart';
 
 class RouteManager {
@@ -14,27 +16,47 @@ class RouteManager {
   static const String registrationPage = '/register';
   static const String mainPage = '/main';
   static const String profile = '/profile';
+  static const String mainLayout = '/home';
+  static const String completeProfile = '/completeProfile';
 
-// EditProfileScreen
+  // EditProfileScreen
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case loginPage:
         return MaterialPageRoute(builder: (_) => const AuthPage(isLogin: true));
       case registrationPage:
-        return MaterialPageRoute(builder: (_) => const AuthPage(isLogin: false));
+        return MaterialPageRoute(
+          builder: (_) => const AuthPage(isLogin: false),
+        );
       case profile:
         return MaterialPageRoute(builder: (_) => const EditProfileScreen());
-
+      case mainLayout:
+        final args = settings.arguments as Map;
+        return MaterialPageRoute(
+          builder:
+              (_) => MainLayout(
+                email: args['email'],
+              ),
+        );
+        case completeProfile:
+        final args = settings.arguments as Map;
+        return MaterialPageRoute(
+          builder:
+              (_) => CompleteProfilePage(
+                uid: args['uid'],
+                email: args['email'],
+                name: args['name'],
+              ),
+        );
       case mainPage:
         final email = settings.arguments as String;
-        return MaterialPageRoute(
-          builder: (_) => MainPage(email: email),
-        );
+        return MaterialPageRoute(builder: (_) => MainPage(email: email));
       default:
         return MaterialPageRoute(
-          builder: (_) => Scaffold(
-            body: Center(child: Text('No route for ${settings.name}')),
-          ),
+          builder:
+              (_) => Scaffold(
+                body: Center(child: Text('No route for ${settings.name}')),
+              ),
         );
     }
   }

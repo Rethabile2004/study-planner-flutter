@@ -4,6 +4,7 @@
 // https://www.linkedin.com/in/rethabile-eric-siase-6199a131a
 //
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_flutter/routes/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,107 +30,6 @@ class _AuthPageState extends State<AuthPage> {
 
   bool _isLoading = false;
   final _mainFormKey = GlobalKey<FormState>();
-  final _detailsFormKey = GlobalKey<FormState>();
-
-  Future<void> _showPersonalDetailsDialog(BuildContext context) async {
-    final theme = Theme.of(context);
-
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Icon(Icons.person_outline, color: theme.colorScheme.primary),
-            const SizedBox(width: 8),
-            const Text(
-              "Enter Personal Details",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: SizedBox(
-            width: 320,
-            child: Form(
-              key: _detailsFormKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildInputField(
-                    controller: _nameController,
-                    label: 'Full Name',
-                    icon: Icons.badge_outlined,
-                  ),
-                  const SizedBox(height: 14),
-                  _buildInputField(
-                    controller: _surnameController,
-                    label: 'Surname',
-                    icon: Icons.person_outline,
-                  ),
-                  const SizedBox(height: 14),
-                  _buildInputField(
-                    controller: _studentNumberController,
-                    label: 'Student Number',
-                    icon: Icons.school_outlined,
-                  ),
-                  const SizedBox(height: 14),
-                  _buildInputField(
-                    controller: _phoneNumberController,
-                    label: 'Phone Number',
-                    icon: Icons.phone_outlined,
-                    keyboardType: TextInputType.phone,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        actionsPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              "Cancel",
-              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-            onPressed: _isLoading
-                ? null
-                : () {
-                    if (_detailsFormKey.currentState!.validate()) {
-                      setState(() => _isLoading = true);
-                      _submit(context);
-                    }
-                  },
-            child: _isLoading
-                ? const SizedBox(
-                    height: 22,
-                    width: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : const Text('Save Details',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildInputField({
     required TextEditingController controller,
@@ -180,8 +80,9 @@ class _AuthPageState extends State<AuthPage> {
         Navigator.pushReplacementNamed(context, RouteManager.loginPage);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -192,42 +93,77 @@ class _AuthPageState extends State<AuthPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Reset Password"),
-        content: TextFormField(
-          controller: emailController,
-          decoration: const InputDecoration(labelText: "Enter your email"),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final email = emailController.text.trim();
-              if (email.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Please enter your email")));
-                return;
-              }
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Reset Password"),
+            content: TextFormField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: "Enter your email"),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final email = emailController.text.trim();
+                  if (email.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Please enter your email")),
+                    );
+                    return;
+                  }
 
-              try {
-                final authService =
-                    Provider.of<AuthService>(context, listen: false);
-                await authService.resetPassword(email);
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content:
-                        Text("Password reset link sent to your email")));
-              } catch (e) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text("Error: $e")));
-              }
-            },
-            child: const Text("Send Reset Link"),
+                  try {
+                    final authService = Provider.of<AuthService>(
+                      context,
+                      listen: false,
+                    );
+                    await authService.resetPassword(email);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Password reset link sent to your email"),
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text("Error: $e")));
+                  }
+                },
+                child: const Text("Send Reset Link"),
+              ),
+            ],
           ),
-        ],
+    );
+  }
+
+  Widget _socialButton({required String asset, required VoidCallback onTap}) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(30),
+      onTap: onTap,
+      child: Container(
+        width: 210,
+        height: 60,
+        decoration: BoxDecoration(
+          // ignore: deprecated_member_use
+          color: Colors.white.withOpacity(0.2),
+          // shape: BoxShape.circle,
+          // ignore: deprecated_member_use
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: Colors.white.withOpacity(0.3),),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(asset, width: 32, height: 32),
+              const Text("Sign in with Google"),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -242,125 +178,221 @@ class _AuthPageState extends State<AuthPage> {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF3A7BD5), Color(0xFF00D2FF)],
+            colors: [
+              Color.fromARGB(255, 255, 255, 255),
+              Color.fromARGB(255, 218, 218, 218),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
         child: Center(
           child: SingleChildScrollView(
-            child: Card(
-              elevation: 12,
-              color: Colors.white.withOpacity(0.95),
-              shadowColor: Colors.black26,
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-                child: Form(
-                  key: _mainFormKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        widget.isLogin
-                            ? 'assets/welcome.png'
-                            : 'assets/passwd.png',
-                        height: 160,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+              child: Form(
+                key: _mainFormKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // CircleAvatar(
+                    //   radius: 89,
+                    //   // backgroundColor: Colors.white,
+                    // ),
+                    Icon(Icons.grade_rounded, size: 120, color: Colors.yellow),
+
+                    // Image.asset(
+                    //   widget.isLogin
+                    //       ? 'assets/welcome.png'
+                    //       : 'assets/passwd.png',
+                    //   height: 160,
+                    // ),
+                    const SizedBox(height: 16),
+                    Text(
+                      widget.isLogin ? 'Welcome Back' : 'New Account',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 40,
+                        color: Colors.blueGrey[800],
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        widget.isLogin
-                            ? 'Welcome Back 👋'
-                            : 'Create Your Account ✨',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueGrey[800],
-                        ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      widget.isLogin
+                          ? 'Enter your credintials to login'
+                          : 'Register to continue',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        // fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Colors.blueGrey[600],
                       ),
-                      const SizedBox(height: 20),
-                      EmailFormField(controller: _emailController),
-                      const SizedBox(height: 14),
-                      PasswordFormField(controller: _passwordController),
-                      if (widget.isLogin)
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () =>
-                                _showForgotPasswordDialog(context),
-                            child: const Text(
-                              'Forgot Password?',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.blueGrey,
-                              ),
+                    ),
+                    Container(
+                      width: 300,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          if (!widget.isLogin)
+                            _buildInputField(
+                              controller: _nameController,
+                              label: 'Full Name',
+                              icon: Icons.badge_outlined,
                             ),
-                          ),
-                        ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: theme.colorScheme.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                          const SizedBox(height: 14),
+                          if (!widget.isLogin)
+                            _buildInputField(
+                              controller: _surnameController,
+                              label: 'Surname',
+                              icon: Icons.person_outline,
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                          onPressed: _isLoading
-                              ? null
-                              : () {
-                                  if (!_mainFormKey.currentState!.validate()) {
-                                    return;
-                                  } else if (!widget.isLogin) {
-                                    _showPersonalDetailsDialog(context);
-                                  } else {
-                                    _submit(context);
-                                  }
-                                },
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 24,
-                                  width: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(
-                                  widget.isLogin ? 'Login' : 'Register',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          const SizedBox(height: 14),
+                          if (!widget.isLogin)
+                            _buildInputField(
+                              controller: _studentNumberController,
+                              label: 'Student Number',
+                              icon: Icons.school_outlined,
+                            ),
+                          const SizedBox(height: 14),
+                          if (!widget.isLogin)
+                            _buildInputField(
+                              controller: _phoneNumberController,
+                              label: 'Phone Number',
+                              icon: Icons.phone_outlined,
+                              keyboardType: TextInputType.phone,
+                            ),
+                          const SizedBox(height: 14),
+                          EmailFormField(controller: _emailController),
+                          const SizedBox(height: 14),
+                          PasswordFormField(controller: _passwordController),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 40,
+                            // width: 160,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: theme.colorScheme.primary,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                              ),
+                              onPressed:
+                                  _isLoading
+                                      ? null
+                                      : () {
+                                        if (!_mainFormKey.currentState!
+                                            .validate()) {
+                                          return;
+                                        } else if (!widget.isLogin) {
+                                          // _showPersonalDetailsDialog(context);
+                                          _submit(context);
+                                        } else {
+                                          _submit(context);
+                                        }
+                                      },
+                              child:
+                                  _isLoading
+                                      ? const SizedBox(
+                                        height: 24,
+                                        width: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                      : Text(
+                                        widget.isLogin ? 'Login' : 'Register',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _socialButton(
+                      asset: 'assets/google.png',
+                      onTap: () async {
+                        final auth = Provider.of<AuthService>(
+                          context,
+                          listen: false,
+                        );
+                    
+                        try {
+                          final result = await auth.signInWithGoogle();
+                          final user = result.user;
+                    
+                          final doc =
+                              await FirebaseFirestore.instance
+                                  .collection("users")
+                                  .doc(user!.uid)
+                                  .get();
+                    
+                          if (doc.exists) {
+                            // Profile already created
+                            Navigator.pushReplacementNamed(
+                              // ignore: use_build_context_synchronously
+                              context,
+                              RouteManager.completeProfile,
+                              arguments: user.email,
+                            );
+                          } else {
+                            Navigator.pushReplacementNamed(
+                              // ignore: use_build_context_synchronously
+                              context,
+                              RouteManager.mainPage,
+                              arguments: {
+                                "email": user.email,
+                                "name": user.displayName ?? "",
+                                "uid": user.uid,
+                              },
+                            );
+                          }
+                        } catch (e) {
+                          // ignore: use_build_context_synchronously
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(e.toString())),
+                          );
+                        }
+                      },
+                    ),
+
+                    const SizedBox(height: 14),
+                    TextButton(
+                      onPressed:
+                          () => Navigator.pushReplacementNamed(
+                            context,
+                            widget.isLogin
+                                ? RouteManager.registrationPage
+                                : RouteManager.loginPage,
+                          ),
+                      child: Text(
+                        widget.isLogin ? "Sign up" : "Sign in",
+                        style: const TextStyle(
+                          color: Colors.blueGrey,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 14),
+                    ),
+                    if (widget.isLogin)
                       TextButton(
-                        onPressed: () => Navigator.pushReplacementNamed(
-                          context,
-                          widget.isLogin
-                              ? RouteManager.registrationPage
-                              : RouteManager.loginPage,
-                        ),
-                        child: Text(
-                          widget.isLogin
-                              ? "Don't have an account? Sign up"
-                              : "Already have an account? Login",
-                          style: const TextStyle(
-                            color: Colors.blueGrey,
+                        onPressed: () => _showForgotPasswordDialog(context),
+                        child: const Text(
+                          'Forgot Password?',
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
+                            color: Colors.blueGrey,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             ),

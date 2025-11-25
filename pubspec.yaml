@@ -68,7 +68,7 @@ flutter:
     - assets/empty.png
     - assets/passwd.png
     - assets/welcome.png
-    - assets/.env
+    - assets/google.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

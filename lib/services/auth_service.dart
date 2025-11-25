@@ -76,6 +76,39 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+    Future<UserCredential> signInWithGoogle() async {
+    final provider = GoogleAuthProvider();
+    provider.setCustomParameters({'prompt': 'select_account'});
+    return await _auth.signInWithPopup(provider);
+  }
+
+  Future<AppUser?> createUserCollection(
+    String name,
+    surname,
+    email,
+    phoneNumber,
+    studentNumber,
+    uid,
+  ) async {
+    // Create an AppUser object with additional user data
+    AppUser appUser = AppUser(
+      email: email,
+      name: name,
+      createdAt: DateTime.now(),
+      surname: surname,
+      studentNumber: studentNumber,
+      phoneNumber: phoneNumber,
+    );
+
+    // Save the user data to Firestore
+    await _firestore.collection('users').doc(uid).set(appUser.toFirestore());
+    return appUser; // Return the newly created user
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //                       const SnackBar(content: Text("Please enter your email")),
+    //                     );
+    // return userCredential.user; // Return the newly created user
+  }
+  
   Future<void> resetPassword(String email) async {
     if (email.isEmpty) throw 'Email is required for password reset';
     await FirebaseAuth.instance.sendPasswordResetEmail(email: email);

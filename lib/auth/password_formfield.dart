@@ -20,7 +20,6 @@ class PasswordFormField extends StatelessWidget {
       
       decoration: const InputDecoration(
         labelText: 'Password',
-        prefixIcon: Icon(Icons.lock),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
         ),
