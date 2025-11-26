@@ -7,7 +7,7 @@
 import 'package:firebase_flutter/auth/auth_page.dart';
 import 'package:firebase_flutter/auth/complete_profile.dart';
 import 'package:firebase_flutter/views/edit_profile_screen.dart';
-import 'package:firebase_flutter/views/home_page.dart';
+// import 'package:firebase_flutter/views/home_page.dart';
 import 'package:firebase_flutter/views/main_layout.dart';
 import 'package:flutter/material.dart';
 
@@ -50,7 +50,7 @@ class RouteManager {
         );
       case mainPage:
         final email = settings.arguments as String;
-        return MaterialPageRoute(builder: (_) => MainPage(email: email));
+        return MaterialPageRoute(builder: (_) => MainLayout(email: email));
       default:
         return MaterialPageRoute(
           builder:

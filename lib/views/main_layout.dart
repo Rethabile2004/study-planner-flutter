@@ -3,6 +3,7 @@
 // Purpose                  : Integrated fiebase storage for managing(adding, removing and updating) modules
 //
 
+import 'package:firebase_flutter/views/edit_profile_screen.dart';
 import 'package:firebase_flutter/views/home_page.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +20,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   final _screens = [
      MainPage(email: "",),
-    Center()
+    EditProfileScreen()
   ];
 
   @override
@@ -31,28 +32,30 @@ class _MainLayoutState extends State<MainLayout> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF5E6EFF), Color(0xFF3D4EFF)],
+            colors: [
+              Color.fromARGB(255, 255, 255, 255),
+              Color.fromARGB(255, 218, 218, 218),
+            ],
           ),
         ),
         child: _screens[_currentIndex],
       ),
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.all(20),
+        margin: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          // ignore: deprecated_member_use
-          color: Colors.white.withOpacity(0.15),
           borderRadius: BorderRadius.circular(30),
           // ignore: deprecated_member_use
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
+          border: Border.all(color: Colors.blueGrey.shade900),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(30),
           child: BottomNavigationBar(
+            backgroundColor: Colors.blueGrey,
             currentIndex: _currentIndex,
             onTap: (i) => setState(() => _currentIndex = i),
-            backgroundColor: Colors.transparent,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white60,
+            // backgroundColor: Colors.transparent,
+            selectedItemColor: Colors.amber[600],
+            // unselectedItemColor: Colors.white60,
             showSelectedLabels: true,
             showUnselectedLabels: true,
             type: BottomNavigationBarType.fixed,

@@ -340,20 +340,24 @@ class _AuthPageState extends State<AuthPage> {
                             Navigator.pushReplacementNamed(
                               // ignore: use_build_context_synchronously
                               context,
-                              RouteManager.completeProfile,
+                              RouteManager.mainPage,
                               arguments: user.email,
                             );
-                          } else {
+                          } else if(!doc.exists){
                             Navigator.pushReplacementNamed(
                               // ignore: use_build_context_synchronously
                               context,
-                              RouteManager.mainPage,
+                              RouteManager.completeProfile,
                               arguments: {
                                 "email": user.email,
                                 "name": user.displayName ?? "",
                                 "uid": user.uid,
                               },
                             );
+                          }else{
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('ssssssssssssssssssssss')),
+                          );  
                           }
                         } catch (e) {
                           // ignore: use_build_context_synchronously

@@ -46,7 +46,6 @@ class _MainPageState extends State<MainPage> {
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.1),
-      appBar: AppBar(title: const Text('Study Planner Dashboard')),
       drawer: _buildDrawer(context, authService),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

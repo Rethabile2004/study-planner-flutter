@@ -4,8 +4,6 @@
 // https://www.linkedin.com/in/rethabile-eric-siase-6199a131a
 //
 
-
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_flutter/routes/app_router.dart';
 import 'package:firebase_flutter/services/auth_service.dart';
@@ -19,13 +17,13 @@ void main() async {
   if (kIsWeb) {
     await Firebase.initializeApp(
       options: FirebaseOptions(
-        apiKey: 'AIzaSyCkQFmR-g_ajUXmH1tYDDsNjTGM895YUoc',
-        authDomain: 'studyplanner-9186a.firebaseapp.com',
-        projectId: 'studyplanner-9186a',
-        storageBucket: 'studyplanner-9186a.firebasestorage.app',
-        messagingSenderId: '22751367494',
-        appId: '1:22751367494:web:679af8be4599cf132a9547',
-        measurementId: 'G-1EYTB90XFL',
+        apiKey: "AIzaSyBx54EAXp9TCYte8d705fUIGEzn_V6JwTk",
+        authDomain: "studyplanner-51b4d.firebaseapp.com",
+        projectId: "studyplanner-51b4d",
+        storageBucket: "studyplanner-51b4d.firebasestorage.app",
+        messagingSenderId: "1018117580183",
+        appId: "1:1018117580183:web:f0d8da541db3a2842a90d2",
+        measurementId: "G-YWZ8ZQ1SQW",
       ),
     );
   } else {
@@ -66,6 +64,10 @@ class MyApp extends StatelessWidget {
         fontFamily: 'LibreFranklin',
 
         // --- AppBar Theme ---
+        bottomAppBarTheme: BottomAppBarThemeData(
+          elevation: 6,
+          
+        ),
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.blueGrey.shade800,
           foregroundColor: Colors.white,
@@ -76,7 +78,7 @@ class MyApp extends StatelessWidget {
             fontFamily: 'LibreFranklin',
             color: Colors.white,
           ),
-          iconTheme: const IconThemeData(color: Colors.white),
+          iconTheme:  IconThemeData(color: Colors.amber.shade600),
         ),
 
         // --- Floating Action Button ---

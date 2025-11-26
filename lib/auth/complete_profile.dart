@@ -30,6 +30,10 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
   final _studentNumberController = TextEditingController();
   final _phoneNumberController = TextEditingController();
   final _nameController = TextEditingController();
+  List<String> splitInput() {
+    var names = widget.name.split(' ');
+    return names;
+  }
 
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
@@ -53,9 +57,17 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
     );
   }
 
+  // void _showProgress(BuildContext context){
+  //   showDialog(context: context, builder: (context){
+  //     return AlertDialog(title:Text(_isLoading?"Creating account...":"Account ",)
+  //   });
+  // }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    _nameController.text = splitInput()[0];
+    _surnameController.text = splitInput()[1];
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
@@ -173,6 +185,9 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
                                     _isLoading
                                         ? null
                                         : () async {
+                                          if (!_formKey.currentState!
+                                              .validate())
+                                            return;
                                           setState(() => _isLoading = true);
 
                                           final provider =
@@ -180,20 +195,36 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
                                                 context,
                                                 listen: false,
                                               );
-                                          await provider.createUserCollection(
-                                            widget.name,
-                                            _surnameController.text.trim(),
-                                            widget.email,
-                                            _phoneNumberController.text.trim(),
-                                            _studentNumberController.text
-                                                .trim(),
-                                            widget.uid,
-                                          );
+                                          await provider
+                                              .createUserCollection(
+                                                widget.name,
+                                                _surnameController.text.trim(),
+                                                widget.email,
+                                                _phoneNumberController.text
+                                                    .trim(),
+                                                _studentNumberController.text
+                                                    .trim(),
+                                                widget.uid,
+                                              )
+                                              .then(
+                                                (_) => ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      "Account created successfully",
+                                                    ),
+                                                    backgroundColor: Colors.amber,
+                                                    padding: EdgeInsets.all(3),
+                                                    showCloseIcon: true,
+                                                  ),
+                                                ),
+                                              );
                                           if (!mounted) return;
                                           Navigator.pushReplacementNamed(
                                             // ignore: use_build_context_synchronously
                                             context,
-                                            RouteManager.mainLayout,
+                                            RouteManager.mainPage,
                                             arguments: widget.email,
                                           );
                                         },
@@ -216,6 +247,15 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
                                         ),
                               ),
                             ),
+                            SizedBox(height: 13),
+                            TextButton(
+                              child: const Text('Cancel Registration'),
+                              onPressed:
+                                  () => Navigator.pushNamed(
+                                    context,
+                                    RouteManager.loginPage,
+                                  ),
+                            ),
                           ],
                         ),
                       ),
@@ -229,6 +269,4 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
       ),
     );
   }
-
-
 }

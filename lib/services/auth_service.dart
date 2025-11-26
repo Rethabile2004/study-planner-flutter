@@ -82,7 +82,7 @@ class AuthService extends ChangeNotifier {
     return await _auth.signInWithPopup(provider);
   }
 
-  Future<AppUser?> createUserCollection(
+  Future<User?> createUserCollection(
     String name,
     surname,
     email,
@@ -90,6 +90,10 @@ class AuthService extends ChangeNotifier {
     studentNumber,
     uid,
   ) async {
+    // final userCredential = await _auth.currentUser(
+    //     email: email,
+    //     password: name,
+    //   );
     // Create an AppUser object with additional user data
     AppUser appUser = AppUser(
       email: email,
@@ -102,7 +106,7 @@ class AuthService extends ChangeNotifier {
 
     // Save the user data to Firestore
     await _firestore.collection('users').doc(uid).set(appUser.toFirestore());
-    return appUser; // Return the newly created user
+    return _auth.currentUser;
     // ScaffoldMessenger.of(context).showSnackBar(
     //                       const SnackBar(content: Text("Please enter your email")),
     //                     );
