@@ -19,8 +19,9 @@ class _MainLayoutState extends State<MainLayout> {
   int _currentIndex = 0;
 
   final _screens = [
-     MainPage(email: "",),
-    EditProfileScreen()
+     MainPage(),
+    EditProfileScreen(),
+    // StudyPlanDetailsPage(plan: ,)
   ];
 
   @override
@@ -40,31 +41,21 @@ class _MainLayoutState extends State<MainLayout> {
         ),
         child: _screens[_currentIndex],
       ),
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          // ignore: deprecated_member_use
-          border: Border.all(color: Colors.blueGrey.shade900),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: BottomNavigationBar(
-            backgroundColor: Colors.blueGrey,
-            currentIndex: _currentIndex,
-            onTap: (i) => setState(() => _currentIndex = i),
-            // backgroundColor: Colors.transparent,
-            selectedItemColor: Colors.amber[600],
-            // unselectedItemColor: Colors.white60,
-            showSelectedLabels: true,
-            showUnselectedLabels: true,
-            type: BottomNavigationBarType.fixed,
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-              BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-            ],
-          ),
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        selectedFontSize: 16,
+        backgroundColor: Colors.blueGrey,
+        currentIndex: _currentIndex,
+        onTap: (i) => setState(() => _currentIndex = i),
+        // backgroundColor: Colors.transparent,
+        selectedItemColor: Colors.amber[600],
+        // unselectedItemColor: Colors.white60,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+        ],
       ),
     );
   }

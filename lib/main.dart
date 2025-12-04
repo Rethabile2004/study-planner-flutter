@@ -66,6 +66,7 @@ class MyApp extends StatelessWidget {
         // --- AppBar Theme ---
         bottomAppBarTheme: BottomAppBarThemeData(
           elevation: 6,
+          color: Colors.white
           
         ),
         appBarTheme: AppBarTheme(

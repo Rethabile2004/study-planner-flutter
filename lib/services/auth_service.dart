@@ -6,7 +6,6 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_flutter/models/notes.dart';
 import 'package:firebase_flutter/models/study_planner.dart';
 import 'package:flutter/material.dart';
 import '../models/app_user.dart';
@@ -129,8 +128,6 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  // ---------------------- USER PROFILE ----------------------
-
   Future<AppUser?> getUserData(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();
     if (doc.exists) {
@@ -154,40 +151,6 @@ class AuthService extends ChangeNotifier {
 
     notifyListeners(); // Profile info changed
   }
-
-  // ---------------------- NOTES ----------------------
-
-  CollectionReference get _notesCollection => _firestore.collection('notes');
-
-  Future<void> addNote(String name, String description) async {
-    if (currentUser == null) throw Exception('User not authenticated');
-
-    await _notesCollection.add({
-      'name': name,
-      'description': description,
-      'studentId': currentUser!.uid,
-      'createdAt': DateTime.now(),
-    });
-    // Firestore streams handle updates, no notifyListeners() needed
-  }
-
-  Future<void> deleteNote(String noteId) async {
-    await _notesCollection.doc(noteId).delete();
-  }
-
-  Stream<List<Note>> getNotes() {
-    if (currentUser == null) throw Exception('User not authenticated');
-    return _notesCollection
-        .where('studentId', isEqualTo: currentUser!.uid)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs.map((doc) => Note.fromFirestore(doc)).toList(),
-        );
-  }
-
-  // ---------------------- STUDY PLANS ----------------------
 
   String get _uid {
     final u = _auth.currentUser;
@@ -306,7 +269,6 @@ class AuthService extends ChangeNotifier {
           'end': Timestamp.fromDate(end),
           'durationMinutes': durationMinutes,
           'completed': false,
-          'notes': ' ', // never null
           'userId': currentUser!.uid,
           'planId': planRef.id,
           'createdAt': Timestamp.fromDate(now),
@@ -316,8 +278,6 @@ class AuthService extends ChangeNotifier {
 
     notifyListeners();
   }
-
-  // ---------------------- SESSIONS ----------------------
 
   Future<void> addSession(String planId, StudySession session) async {
     final planDoc = await _studyPlansCollection.doc(planId).get();
@@ -371,8 +331,6 @@ class AuthService extends ChangeNotifier {
 
     await _sessionsCollection.doc(session.id).update(session.toFirestore());
   }
-
-  // ---------------------- GREEDY SESSION GENERATOR ----------------------
 
   List<StudySession> _generateSessionsGreedy({
     required DateTime from,
@@ -477,16 +435,4 @@ class AuthService extends ChangeNotifier {
     return sessions.length;
   }
 
-  Future<void> updateNote(
-    String name,
-    String surname,
-    String phoneNumber,
-  ) async {
-    await _notesCollection.doc(currentUser!.uid).update({
-      'name': name,
-      'surname': surname,
-      'phoneNumber': phoneNumber,
-    });
-    notifyListeners();
-  }
-}
+} 
