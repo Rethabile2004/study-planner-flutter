@@ -9,6 +9,7 @@ import 'package:firebase_flutter/routes/app_router.dart';
 import 'package:firebase_flutter/services/auth_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -157,6 +158,29 @@ class MyApp extends StatelessWidget {
           bodySmall: TextStyle(fontSize: 13),
         ),
       ),
+    );
+  }
+}
+
+class WebsiteButton extends StatelessWidget {
+  const WebsiteButton({super.key});
+
+  // The URL to launch
+  final String websiteUrl = 'https://www.google.com';
+
+  // Function to launch the URL
+  Future<void> _launchUrl() async {
+    final Uri uri = Uri.parse(websiteUrl);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw 'Could not launch $websiteUrl';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: _launchUrl,
+      child: const Text(style: TextStyle(fontSize: 18,color: Colors.amber),"Rethabile Eric Siase"),
     );
   }
 }

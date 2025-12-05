@@ -4,216 +4,381 @@
 // https://www.linkedin.com/in/rethabile-eric-siase-6199a131a
 //
 
+import 'package:firebase_flutter/main.dart';
+import 'package:firebase_flutter/models/study_planner.dart';
+import 'package:firebase_flutter/routes/app_router.dart';
+import 'package:firebase_flutter/services/auth_service.dart';
+import 'package:firebase_flutter/views/user_infromation_form.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import '../models/app_user.dart';
-import '../services/auth_service.dart';
 
-class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key});
+class UserSettingsPage extends StatelessWidget {
+  final String userId;
+  final String? name;
+  final String? surname;
+  final String? phone;
 
-  @override
-  State<EditProfileScreen> createState() => _EditProfileScreenState();
-}
-
-class _EditProfileScreenState extends State<EditProfileScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _surnameController = TextEditingController();
-  final _phoneController = TextEditingController();
-
-  bool _isLoading = false;
-  bool _isSaving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserData();
-  }
-
-  Future<void> _loadUserData() async {
-    setState(() => _isLoading = true);
-    try {
-      final auth = Provider.of<AuthService>(context, listen: false);
-      final AppUser? user = await auth.getUserData(auth.currentUser!.uid);
-
-      if (user != null) {
-        _nameController.text = user.name;
-        _surnameController.text = user.surname;
-        _phoneController.text = user.phoneNumber;
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error loading user data: $e')));
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
+  const UserSettingsPage({
+    super.key,
+    required this.userId,
+    this.name,
+    this.surname,
+    this.phone,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
+    final auth = Provider.of<AuthService>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Profile'),
-        backgroundColor: theme.colorScheme.primary,
-        centerTitle: true,
+        leading: IconButton(
+          onPressed: () => _appInfor(context),
+          icon: Icon(Icons.info_outline),
+        ),
+        title: const Text("Settings"),
       ),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : SafeArea(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 24,
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // const Text(
+          //   "Profile",
+          //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          // ),
+          _welcomeHeader(auth),
+          const SizedBox(height: 12),
+
+          // UPDATE PERSONAL INFORMATION
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text("Update Personal Information"),
+            subtitle: const Text("Name, surname, phone"),
+            onTap: () => _openUpdateInfo(context, auth),
+            trailing: const Icon(Icons.chevron_right),
+          ),
+
+          const Divider(height: 32),
+          _quickStats(auth),
+          const Text(
+            "Privacy & Security",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+
+          ListTile(
+            leading: const Icon(Icons.privacy_tip),
+            title: const Text("Privacy & Data"),
+            subtitle: const Text("Manage what data you share"),
+            onTap: () => _showPrivacyBottomSheet(context),
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text("Logout"),
+            onTap: () => _confirmLogout(context),
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.delete_forever, color: Colors.red),
+            title: const Text("Delete Account"),
+            titleTextStyle: const TextStyle(
+              color: Colors.red,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+            onTap: () => _confirmDeleteAccount(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openUpdateInfo(BuildContext context, AuthService auth) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder:
+          (_) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: FutureBuilder(
+              future: auth.getUserData(auth.currentUser!.uid),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const LinearProgressIndicator();
+                }
+                final user = snapshot.data!;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    UserInformationForm(
+                      userId: userId,
+                      initialName: user.name,
+                      initialSurname: user.surname,
+                      initialPhoneNumber: user.phoneNumber,
+                      onSubmit: (n, s, p) async {
+                        auth.updateUserInfo(n, s, p);
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+    );
+  }
+
+  Widget _welcomeHeader(AuthService auth) {
+    return FutureBuilder(
+      future: auth.getUserData(auth.currentUser!.uid),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const LinearProgressIndicator();
+        }
+        final user = snapshot.data!;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "${user.name}'s Profile",
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+            ),
+            Text(
+              "Stay organized. Stay ahead.",
+              style: TextStyle(color: Colors.grey.shade700),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showPrivacyBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder:
+          (_) => Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  "Privacy & Data",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  "• Your data is stored securely in Firestore.\n"
+                  "• You control what personal information is visible.\n"
+                  "• You can delete your account anytime.",
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
+          ),
+    );
+  }
+
+  void _appInfor(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Color.fromARGB(255, 218, 218, 218),
+          icon: Icon(Icons.info, size: 65),
+          title: Text(
+            "Study Planner",
+            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 31),
+          ),
+          content: SizedBox(
+            height: 210,
+            child: Center(
+              child: Column(
+                children: [
+                  Center(
+                    child: Text(
+                      "Study planner helps students manage their time, by allowing them to allocate specific hours to their subjects for a specific amount of time.",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: const Color.fromARGB(255, 84, 83, 83),
+                      ),
+                    ),
                   ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
+                  SizedBox(height: 10),
+                  Text(
+                    "Developed by",
+                    style: TextStyle(color: Colors.blueGrey, fontSize: 18),
+                  ),
+                  Center(
+                    child: Row(
                       children: [
-                        // Profile Avatar
-                        Center(
-                          child: Stack(
-                            children: [
-                              CircleAvatar(
-                                radius: 55,
-                                backgroundColor: theme.colorScheme.primary
-                                    .withOpacity(0.2),
-                                child: const Icon(
-                                  Icons.person,
-                                  size: 60,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: FloatingActionButton.small(
-                                  backgroundColor: theme.colorScheme.primary,
-                                  onPressed: () {
-                                    // Future: add image picker logic here
-                                  },
-                                  child: const Icon(
-                                    Icons.camera_alt,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: WebsiteButton(),
                         ),
-                        const SizedBox(height: 28),
-
-                        // Input fields
-                        _buildTextField(
-                          controller: _nameController,
-                          label: 'First Name',
-                          icon: Icons.person_outline,
-                          validator:
-                              (v) =>
-                                  v!.isEmpty
-                                      ? 'Please enter your first name'
-                                      : null,
+                        Text(
+                          style: TextStyle(fontSize: 18),
+                          " - December 2025",
                         ),
-                        const SizedBox(height: 18),
-
-                        _buildTextField(
-                          controller: _surnameController,
-                          label: 'Surname',
-                          icon: Icons.badge_outlined,
-                          validator:
-                              (v) =>
-                                  v!.isEmpty
-                                      ? 'Please enter your surname'
-                                      : null,
-                        ),
-                        const SizedBox(height: 18),
-
-                        _buildTextField(
-                          controller: _phoneController,
-                          label: 'Phone Number',
-                          icon: Icons.phone_outlined,
-                          keyboardType: TextInputType.phone,
-                          validator:
-                              (v) =>
-                                  v!.isEmpty
-                                      ? 'Please enter your phone number'
-                                      : null,
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        _isSaving
-                            ? const CircularProgressIndicator()
-                            : ElevatedButton.icon(
-                              onPressed: _saveProfile,
-                              icon: const Icon(Icons.save_outlined),
-                              label: const Text('Save Changes'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: theme.colorScheme.primary,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(double.infinity, 50),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("close"),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-        filled: true,
-        fillColor: Colors.blueGrey[50],
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+  void _confirmLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: const Text("Logout"),
+            content: const Text("Are you sure you want to logout?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await FirebaseAuth.instance.signOut();
+                  // ignore: use_build_context_synchronously
+                  Navigator.pushNamed(
+                    context,
+                    RouteManager.loginPage,
+                  ); // back to login
+                },
+                child: const Text("Logout"),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Widget _quickStats(AuthService auth) {
+    return StreamBuilder<List<StudyPlan>>(
+      stream: auth.getStudyPlans(),
+      builder: (context, snapshot) {
+        final plans = snapshot.data ?? [];
+
+        int total = plans.length;
+        int completed =
+            plans.where((p) => p.completedHours >= p.estimatedHours).length;
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _statCard("Total Plans", total.toString(), Icons.assignment),
+            _statCard("Completed", completed.toString(), Icons.check_circle),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _statCard(String label, String value, IconData icon) {
+    return Expanded(
+      child: Card(
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: ListTile(
+            leading: Icon(icon, size: 28, color: Colors.blueAccent),
+            title: Text(label),
+            subtitle: Text(value),
+          ),
+          // Column(
+          //   children: [
+          //     Icon(icon, size: 28, color: Colors.blueAccent),
+          //     const SizedBox(height: 6),
+          //     Text(
+          //       value,
+          //       style: const TextStyle(
+          //         fontSize: 20,
+          //         fontWeight: FontWeight.bold,
+          //       ),
+          //     ),
+          //     Text(label),
+          //   ],
+          // ),
+        ),
       ),
     );
   }
 
-  Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isSaving = true);
+  void _confirmDeleteAccount(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: const Text(
+              "Delete Account",
+              style: TextStyle(color: Colors.red),
+            ),
+            content: const Text(
+              "This action is irreversible.\n\nAll your study plans and sessions will be permanently deleted.",
+            ),
+            actions: [
+              TextButton(
+                child: const Text("Cancel"),
+                onPressed: () => Navigator.pop(context),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await _deleteAccount();
+                  // ignore: use_build_context_synchronously
+                  Navigator.pushNamed(context, RouteManager.loginPage);
+                },
+                child: const Text("Delete"),
+              ),
+            ],
+          ),
+    );
+  }
 
-    try {
-      final auth = Provider.of<AuthService>(context, listen: false);
-      await auth.updateUserInfo(
-        _nameController.text.trim(),
-        _surnameController.text.trim(),
-        _phoneController.text.trim(),
-      );
+  Future<void> _deleteAccount() async {
+    final auth = FirebaseAuth.instance;
+    final user = auth.currentUser;
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully!')),
-        );
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error updating profile: $e')));
-    } finally {
-      setState(() => _isSaving = false);
-    }
+    await FirebaseFirestore.instance.collection("users").doc(userId).delete();
+    await FirebaseFirestore.instance
+        .collection("studyPlans")
+        .where("userId", isEqualTo: userId)
+        .get()
+        .then((snap) async {
+          for (var d in snap.docs) {
+            await d.reference.delete();
+          }
+        });
+
+    await FirebaseFirestore.instance
+        .collection("sessions")
+        .where("userId", isEqualTo: userId)
+        .get()
+        .then((snap) async {
+          for (var d in snap.docs) {
+            await d.reference.delete();
+          }
+        });
+
+    await user?.delete();
   }
 }

@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_flutter/main.dart';
 import 'package:firebase_flutter/routes/app_router.dart';
 import 'package:firebase_flutter/views/create_plan.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,10 @@ class MainPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => _appInfor(context),
+          icon: Icon(Icons.info_outline),
+        ),
         title: const Text("Study Planner"),
         centerTitle: true,
         actions: [
@@ -22,7 +27,7 @@ class MainPage extends StatelessWidget {
             icon: const Icon(Icons.logout),
             onPressed: () {
               FirebaseAuth.instance.signOut();
-              Navigator.pushNamed(context,RouteManager.loginPage);
+              Navigator.pushNamed(context, RouteManager.loginPage);
             },
           ),
         ],
@@ -35,16 +40,37 @@ class MainPage extends StatelessWidget {
           const SizedBox(height: 20),
           _quickStats(auth),
           const SizedBox(height: 25),
-          const Text(
-            "Your Study Plans",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Your Study Plans",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  OutlinedButton.icon(
+                    label: Text('Create Plan'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => CreatePlanScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 10),
           _studyPlanList(auth, context),
         ],
       ),
 
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: ElevatedButton(
         onPressed: () {
           Navigator.push(
             context,
@@ -53,6 +79,65 @@ class MainPage extends StatelessWidget {
         },
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  void _appInfor(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Color.fromARGB(255, 218, 218, 218),
+          icon: Icon(Icons.info, size: 65),
+          title: Text(
+            "Study Planner",
+            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 31),
+          ),
+          content: SizedBox(
+            height: 210,
+            child: Center(
+              child: Column(
+                children: [
+                  Center(
+                    child: Text(
+                      "Study planner helps students manage their time, by allowing them to allocate specific hours to their subjects for a specific amount of time.",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: const Color.fromARGB(255, 84, 83, 83),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "Developed by",
+                    style: TextStyle(color: Colors.blueGrey, fontSize: 18),
+                  ),
+                  Center(
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: WebsiteButton(),
+                        ),
+                        Text(
+                          style: TextStyle(fontSize: 18),
+                          " - December 2025",
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("close"),
+            ),
+          ],
+        );
+      },
     );
   }
 

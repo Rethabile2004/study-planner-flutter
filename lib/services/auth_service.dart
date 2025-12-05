@@ -310,7 +310,7 @@ class AuthService extends ChangeNotifier {
     if (!planDoc.exists || planDoc.data()?['userId'] != _uid) {
       throw Exception('StudyPlan not found or unauthorized');
     }
-
+    deleteStudyPlan(planId);
     final ref = _sessionsCollection
         .where('userId', isEqualTo: _uid)
         .where('planId', isEqualTo: planId);
@@ -434,5 +434,5 @@ class AuthService extends ChangeNotifier {
     await batch.commit();
     return sessions.length;
   }
-
+  
 } 

@@ -20,7 +20,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   final _screens = [
      MainPage(),
-    EditProfileScreen(),
+    UserSettingsPage(userId: '132',name: "Jess",),
     // StudyPlanDetailsPage(plan: ,)
   ];
 

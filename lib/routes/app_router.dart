@@ -40,7 +40,16 @@ class RouteManager {
         );
 
       case profile:
-        return MaterialPageRoute(builder: (_) => const EditProfileScreen());
+        final args = settings.arguments as Map;
+        return MaterialPageRoute(
+          builder:
+              (_) => UserSettingsPage(
+                userId: args["userId"],
+                name: args["name"],
+                phone: args["phoneNumber"],
+                surname: args["surname"],
+              ),
+        );
       case createPlan:
         return MaterialPageRoute(builder: (_) => const CreatePlanScreen());
       case mainLayout:
