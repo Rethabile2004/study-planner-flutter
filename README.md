@@ -11,11 +11,11 @@ A cross-platform Flutter application that allows authenticated users to create, 
 
 ## Screenshots
 
-<img width="624" height="913" alt="image" src="https://github.com/user-attachments/assets/073baecb-a100-44b9-ba55-b378816be830" />
-<img width="622" height="912" alt="image" src="https://github.com/user-attachments/assets/ab756765-5e11-47d7-a781-a439fff784b9" />
-<img width="625" height="910" alt="image" src="https://github.com/user-attachments/assets/4cc2be8e-bafa-4a24-8ebf-ccf0f517727d" />
-<img width="623" height="909" alt="image" src="https://github.com/user-attachments/assets/57eebf41-8e28-45a6-a60c-eccbf0045298" />
-<img width="623" height="911" alt="image" src="https://github.com/user-attachments/assets/04471678-1926-4468-80a7-8af16ba44a62" />
+<img width="300" height="600" alt="image" src="https://github.com/user-attachments/assets/5baddb0e-6154-44a1-ac6a-3610da900305" />
+<img width="300" height="600" alt="image" src="https://github.com/user-attachments/assets/33776041-d1c0-4838-91ee-5fcb9694d34e" />
+<img width="300" height="600" alt="image" src="https://github.com/user-attachments/assets/72b1c7dd-c0e3-424b-b657-e91e2eda10c6" />
+<img width="300" height="600" alt="image" src="https://github.com/user-attachments/assets/450b1699-aead-42cc-ba45-cacbb7569c96" />
+<img width="300" height="600" alt="image" src="https://github.com/user-attachments/assets/a63ecdb7-c81d-4b93-819e-c3f49ab48ed3" />
 
 ## Getting Started
 
