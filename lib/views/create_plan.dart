@@ -20,6 +20,30 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
   double _priority = 1;
   int _preferredMinutes = 60;
 
+  Color sliderColor(double p) {
+    switch (p) {
+      case 5:
+        return Colors.red;
+      case 4:
+        return Colors.orange;
+      // case 3:return Colors.green;
+    }
+    return Colors.green;
+  }
+
+  Color hoursSliderColor(String h) {
+    switch (h) {
+      case '5 hrs':
+        return Colors.red;
+      case '4 hrs':
+        return Colors.green;
+      case '3 hrs':
+        return Colors.blue;
+      // case 3:return Colors.green;
+    }
+    return Colors.green;
+  }
+
   Future<void> _pickDueDate() async {
     final now = DateTime.now();
 
@@ -39,9 +63,9 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_dueDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Select a due date')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Select a due date')));
       return;
     }
 
@@ -64,18 +88,16 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
 
       Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Create Study Plan"),
-      ),
+      appBar: AppBar(title: const Text("Create Study Plan")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -90,8 +112,9 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
                   labelText: "Title",
                   border: OutlineInputBorder(),
                 ),
-                validator: (v) =>
-                    v == null || v.trim().isEmpty ? "Enter a title" : null,
+                validator:
+                    (v) =>
+                        v == null || v.trim().isEmpty ? "Enter a title" : null,
               ),
 
               const SizedBox(height: 16),
@@ -142,6 +165,7 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
                 value: _estimatedHours,
                 min: 1,
                 max: 5,
+                activeColor: sliderColor(this._estimatedHours),
                 divisions: 99,
                 label: "${_estimatedHours.toInt()} hrs",
                 onChanged: (v) => setState(() => _estimatedHours = v),
@@ -156,6 +180,7 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
                 min: 1,
                 max: 5,
                 divisions: 4,
+                activeColor: sliderColor(this._priority),
                 label: "${_priority.toInt()}",
                 onChanged: (v) => setState(() => _priority = v),
               ),

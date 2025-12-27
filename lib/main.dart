@@ -166,12 +166,12 @@ class WebsiteButton extends StatelessWidget {
   const WebsiteButton({super.key});
 
   // The URL to launch
-  final String websiteUrl = 'https://www.google.com';
+  final String websiteUrl = 'https://github.com/Rethabile2004';
 
   // Function to launch the URL
   Future<void> _launchUrl() async {
     final Uri uri = Uri.parse(websiteUrl);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+    if (!await launchUrl(uri, mode: LaunchMode.platformDefault)) {
       throw 'Could not launch $websiteUrl';
     }
   }
